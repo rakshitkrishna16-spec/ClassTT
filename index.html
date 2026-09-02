@@ -41,7 +41,7 @@
     }
     .time { font-size: 0.8rem; color: var(--subtext); text-transform: uppercase; }
     .subject { font-size: 1.1rem; font-weight: bold; margin: 4px 0; }
-    .details { font-size: 0.9rem; color: var(--subtext); }
+    .details { font-size: 0.9rem; color: var(--subtext); margin-top: 4px; }
   </style>
 </head>
 <body>
@@ -53,7 +53,25 @@
   <div id="scheduleContainer"></div>
 
   <script>
-    // Master Timetable & Faculty Mapping
+    // Full Subject Name Mapping
+    const subjectFullNameMap = {
+      "COA": "Computer Organization and Architecture",
+      "DT": "Design Thinking",
+      "FOM-1": "Foundation of Mathematics - 1",
+      "DMGT": "Discrete Mathematics and Graph Theory",
+      "OS": "Operating Systems",
+      "PP": "Python Programming",
+      "BFE": "Biology for Engineers",
+      "Placement Training": "Placement Training",
+      "OS Lab": "Operating Systems Lab",
+      "PP Lab": "Python Programming Lab",
+      "E-Learning": "E-Learning",
+      "Library": "Library",
+      "Mentoring": "Mentoring",
+      "CLUB ACTIVITIES": "Club Activities"
+    };
+
+    // Faculty Mapping
     const facultyMap = {
       "COA": "Ms. Tripthi P Balakrishnan",
       "DT": "Mrs. Laxmi Kumari Pathak",
@@ -73,44 +91,44 @@
 
     const timetable = {
       "Monday": [
-        { time: "08:45", name: "OS", room: "114 B" },
-        { time: "09:45", name: "E-Learning", room: "114 B" },
-        { time: "11:00", name: "DMGT", room: "114 B" },
-        { time: "12:00", name: "PP", room: "114 B" },
-        { time: "13:50", name: "Placement Training", room: "114 B" }
+        { time: "08:45", code: "OS", room: "114 B" },
+        { time: "09:45", code: "E-Learning", room: "114 B" },
+        { time: "11:00", code: "DMGT", room: "114 B" },
+        { time: "12:00", code: "PP", room: "114 B" },
+        { time: "13:50", code: "Placement Training", room: "114 B" }
       ],
       "Tuesday": [
-        { time: "08:45", name: "COA", room: "114 B" },
-        { time: "09:45", name: "Library", room: "114 B" },
-        { time: "11:00", name: "Placement Training", room: "114 B" },
-        { time: "12:00", name: "Placement Training", room: "114 B" },
-        { time: "13:50", name: "OS Lab", room: "125 B" },
-        { time: "14:50", name: "OS Lab", room: "125 B" }
+        { time: "08:45", code: "COA", room: "114 B" },
+        { time: "09:45", code: "Library", room: "114 B" },
+        { time: "11:00", code: "Placement Training", room: "114 B" },
+        { time: "12:00", code: "Placement Training", room: "114 B" },
+        { time: "13:50", code: "OS Lab", room: "125 B" },
+        { time: "14:50", code: "OS Lab", room: "125 B" }
       ],
       "Wednesday": [
-        { time: "08:45", name: "DMGT", room: "114 B" },
-        { time: "09:45", name: "OS", room: "114 B" },
-        { time: "11:00", name: "DT", room: "114 B" },
-        { time: "13:50", name: "Mentoring", room: "114 B" },
-        { time: "14:50", name: "COA", room: "114 B" }
+        { time: "08:45", code: "DMGT", room: "114 B" },
+        { time: "09:45", code: "OS", room: "114 B" },
+        { time: "11:00", code: "DT", room: "114 B" },
+        { time: "13:50", code: "Mentoring", room: "114 B" },
+        { time: "14:50", code: "COA", room: "114 B" }
       ],
       "Thursday": [
-        { time: "08:45", name: "BFE", room: "114 B" },
-        { time: "11:00", name: "Placement Training", room: "114 B" },
-        { time: "12:00", name: "Placement Training", room: "114 B" },
-        { time: "13:50", name: "PP Lab", room: "125 B" },
-        { time: "14:50", name: "PP Lab", room: "125 B" }
+        { time: "08:45", code: "BFE", room: "114 B" },
+        { time: "11:00", code: "Placement Training", room: "114 B" },
+        { time: "12:00", code: "Placement Training", room: "114 B" },
+        { time: "13:50", code: "PP Lab", room: "125 B" },
+        { time: "14:50", code: "PP Lab", room: "125 B" }
       ],
       "Friday": [
-        { time: "08:45", name: "PP", room: "114 B" },
-        { time: "09:45", name: "Mentoring", room: "114 B" },
-        { time: "11:00", name: "DMGT", room: "114 B" },
-        { time: "12:00", name: "COA", room: "114 B" },
-        { time: "13:50", name: "DT", room: "114 B" }
+        { time: "08:45", code: "PP", room: "114 B" },
+        { time: "09:45", code: "Mentoring", room: "114 B" },
+        { time: "11:00", code: "DMGT", room: "114 B" },
+        { time: "12:00", code: "COA", room: "114 B" },
+        { time: "13:50", code: "DT", room: "114 B" }
       ],
       "Saturday": [
-        { time: "08:45", name: "FOM-1", room: "114 B" },
-        { time: "11:00", name: "CLUB ACTIVITIES", room: "114 B" }
+        { time: "08:45", code: "FOM-1", room: "114 B" },
+        { time: "11:00", code: "CLUB ACTIVITIES", room: "114 B" }
       ]
     };
 
@@ -129,13 +147,17 @@
       }
 
       container.innerHTML = `<h2 style="font-size: 1.1rem; margin-bottom: 12px;">Today's Classes (${today})</h2>` +
-        classes.map(c => `
-          <div class="period-card">
-            <div class="time">${c.time}</div>
-            <div class="subject">${c.name}</div>
-            <div class="details">Room: <b>${c.room}</b> | Faculty: <b>${facultyMap[c.name] || 'N/A'}</b></div>
-          </div>
-        `).join("");
+        classes.map(c => {
+          const fullName = subjectFullNameMap[c.code] || c.code;
+          const faculty = facultyMap[c.code] || 'N/A';
+          return `
+            <div class="period-card">
+              <div class="time">${c.time}</div>
+              <div class="subject">${fullName} (${c.code})</div>
+              <div class="details">Room: <b>${c.room}</b> | Faculty: <b>${faculty}</b></div>
+            </div>
+          `;
+        }).join("");
     }
 
     // Monitor Time and Trigger Notifications (7 mins prior)
@@ -153,9 +175,8 @@
 
         const diffMinutes = (classTime - now) / (1000 * 60);
 
-        // Triggers alert in the 5 to 10 minute window (at ~7 minutes remaining)
         if (diffMinutes >= 5 && diffMinutes <= 10) {
-          const notifKey = `${currentDay}-${c.time}-${c.name}`;
+          const notifKey = `${currentDay}-${c.time}-${c.code}`;
           if (!notifiedPeriods.has(notifKey)) {
             notifiedPeriods.add(notifKey);
             triggerNotification(c);
@@ -165,8 +186,9 @@
     }
 
     function triggerNotification(period) {
-      const faculty = facultyMap[period.name] || "N/A";
-      const title = `Upcoming Class: ${period.name}`;
+      const fullName = subjectFullNameMap[period.code] || period.code;
+      const faculty = facultyMap[period.code] || "N/A";
+      const title = `Upcoming Class: ${fullName}`;
       const options = {
         body: `Starts in ~7 mins (${period.time})\nRoom: ${period.room}\nFaculty: ${faculty}`,
         icon: 'https://via.placeholder.com/128/38bdf8/000000?text=Class'
