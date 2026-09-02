@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Class Schedule & Reminders</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --accent: #38bdf8;
+      --text: #f8fafc;
+      --subtext: #94a3b8;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 16px;
+    }
+    h1 { font-size: 1.5rem; text-align: center; margin-bottom: 8px; }
+    .status { text-align: center; font-size: 0.85rem; color: var(--subtext); margin-bottom: 20px; }
+    button {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      background: var(--accent);
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+    .period-card {
+      background: var(--card);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 12px;
+      border-left: 4px solid var(--accent);
+    }
+    .time { font-size: 0.8rem; color: var(--subtext); text-transform: uppercase; }
+    .subject { font-size: 1.1rem; font-weight: bold; margin: 4px 0; }
+    .details { font-size: 0.9rem; color: var(--subtext); }
+  </style>
+</head>
+<body>
+
+  <h1>AIDE-B Class Schedule</h1>
+  <div class="status" id="notifStatus">Notifications disabled</div>
+  <button id="enableNotifs">Enable Reminders</button>
+
+  <div id="scheduleContainer"></div>
+
+  <script>
+    // Master Timetable & Faculty Mapping
+    const facultyMap = {
+      "COA": "Ms. Tripthi P Balakrishnan",
+      "DT": "Mrs. Laxmi Kumari Pathak",
+      "FOM-1": "Mr. Vishwanatha S",
+      "DMGT": "Dr. Vishal Patil",
+      "OS": "Mrs. Shruti B. Hiregoudar",
+      "PP": "Dr. D. Franklin Vinod",
+      "BFE": "Dr. Yashwanth",
+      "Placement Training": "Placement Trainer",
+      "OS Lab": "Mrs. Shruti B. Hiregoudar",
+      "PP Lab": "Dr. D. Franklin Vinod",
+      "E-Learning": "N/A",
+      "Library": "N/A",
+      "Mentoring": "Faculty Mentor",
+      "CLUB ACTIVITIES": "N/A"
+    };
+
+    const timetable = {
+      "Monday": [
+        { time: "08:45", name: "OS", room: "114 B" },
+        { time: "09:45", name: "E-Learning", room: "114 B" },
+        { time: "11:00", name: "DMGT", room: "114 B" },
+        { time: "12:00", name: "PP", room: "114 B" },
+        { time: "13:50", name: "Placement Training", room: "114 B" }
+      ],
+      "Tuesday": [
+        { time: "08:45", name: "COA", room: "114 B" },
+        { time: "09:45", name: "Library", room: "114 B" },
+        { time: "11:00", name: "Placement Training", room: "114 B" },
+        { time: "12:00", name: "Placement Training", room: "114 B" },
+        { time: "13:50", name: "OS Lab", room: "125 B" },
+        { time: "14:50", name: "OS Lab", room: "125 B" }
+      ],
+      "Wednesday": [
+        { time: "08:45", name: "DMGT", room: "114 B" },
+        { time: "09:45", name: "OS", room: "114 B" },
+        { time: "11:00", name: "DT", room: "114 B" },
+        { time: "13:50", name: "Mentoring", room: "114 B" },
+        { time: "14:50", name: "COA", room: "114 B" }
+      ],
+      "Thursday": [
+        { time: "08:45", name: "BFE", room: "114 B" },
+        { time: "11:00", name: "Placement Training", room: "114 B" },
+        { time: "12:00", name: "Placement Training", room: "114 B" },
+        { time: "13:50", name: "PP Lab", room: "125 B" },
+        { time: "14:50", name: "PP Lab", room: "125 B" }
+      ],
+      "Friday": [
+        { time: "08:45", name: "PP", room: "114 B" },
+        { time: "09:45", name: "Mentoring", room: "114 B" },
+        { time: "11:00", name: "DMGT", room: "114 B" },
+        { time: "12:00", name: "COA", room: "114 B" },
+        { time: "13:50", name: "DT", room: "114 B" }
+      ],
+      "Saturday": [
+        { time: "08:45", name: "FOM-1", room: "114 B" },
+        { time: "11:00", name: "CLUB ACTIVITIES", room: "114 B" }
+      ]
+    };
+
+    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const notifiedPeriods = new Set();
+
+    // Render Today's Schedule
+    function renderTodaySchedule() {
+      const today = days[new Date().getDay()];
+      const container = document.getElementById("scheduleContainer");
+      const classes = timetable[today] || [];
+
+      if (classes.length === 0) {
+        container.innerHTML = `<p style="text-align:center; color: var(--subtext)">No classes scheduled for today (${today}).</p>`;
+        return;
+      }
+
+      container.innerHTML = `<h2 style="font-size: 1.1rem; margin-bottom: 12px;">Today's Classes (${today})</h2>` +
+        classes.map(c => `
+          <div class="period-card">
+            <div class="time">${c.time}</div>
+            <div class="subject">${c.name}</div>
+            <div class="details">Room: <b>${c.room}</b> | Faculty: <b>${facultyMap[c.name] || 'N/A'}</b></div>
+          </div>
+        `).join("");
+    }
+
+    // Monitor Time and Trigger Notifications (7 mins prior)
+    function checkAndNotify() {
+      const now = new Date();
+      const currentDay = days[now.getDay()];
+      const classes = timetable[currentDay];
+
+      if (!classes) return;
+
+      classes.forEach(c => {
+        const [hours, minutes] = c.time.split(":").map(Number);
+        const classTime = new Date();
+        classTime.setHours(hours, minutes, 0, 0);
+
+        const diffMinutes = (classTime - now) / (1000 * 60);
+
+        // Triggers alert in the 5 to 10 minute window (at ~7 minutes remaining)
+        if (diffMinutes >= 5 && diffMinutes <= 10) {
+          const notifKey = `${currentDay}-${c.time}-${c.name}`;
+          if (!notifiedPeriods.has(notifKey)) {
+            notifiedPeriods.add(notifKey);
+            triggerNotification(c);
+          }
+        }
+      });
+    }
+
+    function triggerNotification(period) {
+      const faculty = facultyMap[period.name] || "N/A";
+      const title = `Upcoming Class: ${period.name}`;
+      const options = {
+        body: `Starts in ~7 mins (${period.time})\nRoom: ${period.room}\nFaculty: ${faculty}`,
+        icon: 'https://via.placeholder.com/128/38bdf8/000000?text=Class'
+      };
+
+      if (Notification.permission === "granted") {
+        new Notification(title, options);
+      }
+    }
+
+    // Permission setup
+    document.getElementById("enableNotifs").addEventListener("click", () => {
+      Notification.requestPermission().then(permission => {
+        const statusEl = document.getElementById("notifStatus");
+        if (permission === "granted") {
+          statusEl.innerText = "Reminders active (Notifies 7 mins prior)";
+          statusEl.style.color = "#4ade80";
+        } else {
+          statusEl.innerText = "Permission denied";
+          statusEl.style.color = "#f87171";
+        }
+      });
+    });
+
+    // Initial Load & Loop
+    renderTodaySchedule();
+    setInterval(checkAndNotify, 30000); // Checks every 30 seconds
+  </script>
+</body>
+</html>
